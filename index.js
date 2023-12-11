@@ -14,6 +14,7 @@ const db = mysql.createConnection({
   user: 'root',
   password: 'Piyush@1234',
   database: 'signinlogin',
+  connectTimeout: 20000,
 });
 
 db.connect((err) => {
