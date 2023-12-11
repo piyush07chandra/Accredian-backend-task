@@ -4,13 +4,14 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 
 const app = express();
-const PORT=process.env.PORT || 5000
+const PORT= 5000
 
 app.use(express.json());
-app.use(cors({
-  origin: 'https://acredianfrontend.netlify.app/',
-  methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
-}));
+app.use(cors())
+// app.use(cors({
+//   origin: 'https://acredianfrontend.netlify.app/',
+//   methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
+// }));
 
 const db = mysql.createConnection({
   host: 'localhost',
