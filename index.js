@@ -7,11 +7,11 @@ const app = express();
 const PORT= 5000
 
 app.use(express.json());
-app.use(cors())
-// app.use(cors({
-//   origin: 'https://acredianfrontend.netlify.app/',
-//   methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
-// }));
+
+app.use(cors({
+  origin: 'https://acredianfrontend.netlify.app/',
+  methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
+}));
 
 const db = mysql.createConnection({
   host: 'localhost',
