@@ -25,6 +25,7 @@ db.connect((err) => {
 });
 
 app.post('/signup', async (req, res) => {
+  sser.send('kkjkjk')
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
