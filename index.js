@@ -28,8 +28,12 @@ db.connect((err) => {
   }
 });
 
+app.get('/',(req,res)=>{
+  res.send("deployed")
+})
+
 app.post('/signup', async (req, res) => {
-  res.send('kkjkjk')
+  
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
