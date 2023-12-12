@@ -7,11 +7,11 @@ const app = express();
 const PORT= 5000
 
 app.use(express.json());
-
-app.use(cors({
-  origin: 'https://acredianfrontend.netlify.app/',
-  methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
-}));
+app.use(cors())
+// app.use(cors({
+//   origin: 'https://acredianfrontend.netlify.app/',
+//   methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
+// }));
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -47,15 +47,19 @@ app.post('/signup', async (req, res) => {
     
 
 // Check if the email already exists
-db.query('SELECT * FROM users WHERE email = ?', [user.email], (err, results) => {
+const checkEmailExistsSql = 'SELECT * FROM users WHERE email = ?';
+db.query(checkEmailExistsSql, [user.email], (err, results) => {
   if (err) {
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error checking email existence:', err);
+    res.status(500).send('Error checking email existence');
+    return;
   }
 
   if (results.length > 0) {
-    return res.status(500).json({ message: 'Email already exists. Choose a different email.' });
-    
+    res.status(400).send('Email already exists');
+    return;
   }
+
 
     db.query('INSERT INTO users SET ?', user, (err, result) => {
 
@@ -76,31 +80,40 @@ db.query('SELECT * FROM users WHERE email = ?', [user.email], (err, results) => 
 
 
 app.post('/login', async (req, res) => {
-  try {
-    const email = req.body.email;
-    const password = req.body.password;
+ 
+  const { email, password } = req.body;
 
-    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Internal Server Error' });
-      } else if (results.length > 0) {
-        const user = results[0];
-        const validPassword = await bcrypt.compare(password, user.password);
+  // Check if the email exists
+  const checkEmailExistsSql = 'SELECT * FROM users WHERE email = ?';
+  db.query(checkEmailExistsSql, [email], async (err, results) => {
+    if (err) {
+      console.error('Error checking email existence:', err);
+      res.status(500).send('Error checking email existence');
+      return;
+    }
 
-        if (validPassword) {
-          res.status(200).json({ message: 'Login successful' });
-        } else {
-          res.status(401).json({ message: 'Invalid email or password' });
-        }
+    if (results.length === 0) {
+      res.status(401).send('Email does not exist');
+      return;
+    }
+
+    try {
+      const user = results[0];
+
+      //compare the password
+      const passwordMatch = await bcrypt.compare(password, user.password);
+
+      if (passwordMatch) {
+        // if email and password are correct 
+        res.status(200).send('Login successful');
       } else {
-        res.status(401).json({ message: 'Invalid email or password' });
+        res.status(401).send('Incorrect password');
       }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
+    } catch (error) {
+      console.error('Error comparing passwords:', error);
+      res.status(500).send('Error comparing passwords');
+    }
+  });
 });
 
 app.listen(PORT, () => {
